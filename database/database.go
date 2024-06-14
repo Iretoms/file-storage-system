@@ -3,34 +3,58 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
+	"sync"
+	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect() {
-	// Use the SetServerAPIOptions() method to set the version of the Stable API on the client
-	mongodbUri := os.Getenv("MONGODB_URI")
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(mongodbUri).SetServerAPIOptions(serverAPI)
+var (
+	clientInstance *mongo.Client
+	clientOnce     sync.Once
+)
 
-	// Create a new client and connect to the server
-	client, err := mongo.Connect(context.TODO(), opts)
-	if err != nil {
-		panic(err)
-	}
+func Connect() *mongo.Client {
+	clientOnce.Do(func() {
+		fmt.Println("Initializing MongoDB connection")
 
-	defer func() {
-		if err = client.Disconnect(context.TODO()); err != nil {
-			panic(err)
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
 		}
-	}()
+		mongodbUri := os.Getenv("MONGODB_URI")
 
-	// Send a ping to confirm a successful connection
-	if err := client.Database("admin").RunCommand(context.TODO(), bson.D{{Key: "ping", Value: 1}}).Err(); err != nil {
-		panic(err)
-	}
-	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
+		if mongodbUri == "" {
+			log.Fatal("MONGODB_URI environment variable is not set")
+		}
+
+		ctx, cancelCtx := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancelCtx()
+
+		client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongodbUri))
+		if err != nil {
+			log.Fatalf("Failed to connect to MongoDB: %v", err)
+		}
+
+		err = client.Ping(ctx, nil)
+		if err != nil {
+			log.Fatalf("Failed to ping MongoDB: %v", err)
+		}
+
+		fmt.Println("Connected to MongoDB")
+		clientInstance = client
+	})
+
+	return clientInstance
+}
+
+var DB *mongo.Client = Connect()
+
+func GetCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	collection := client.Database("file-storage-system").Collection(collectionName)
+	return collection
 }
