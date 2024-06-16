@@ -7,7 +7,7 @@ import (
 )
 
 type File struct {
-	Id               primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	ID               primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	FileName         string             `bson:"file_name" json:"file_name" validate:"required"`
 	FileType         string             `bson:"file_type" json:"file_type" validate:"required"`
 	Size             int64              `bson:"size" json:"size" validate:"gte=0"`
@@ -15,5 +15,4 @@ type File struct {
 	LastModifiedDate time.Time          `bson:"last_modified_date" json:"last_modified_date"`
 	Content          []byte             `bson:"content,omitempty" json:"content,omitempty"`
 	ContentType      string             `bson:"content_type" json:"content_type" validate:"required"`
-	URL              string             `bson:"url,omitempty" json:"url,omitempty"`
 }
