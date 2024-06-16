@@ -8,4 +8,5 @@ import (
 
 func FileRoutes(r *gin.RouterGroup) {
 	r.POST("/file", controller.UploadFile())
+	r.GET("/file/:fileID", controller.DownloadFile())
 }

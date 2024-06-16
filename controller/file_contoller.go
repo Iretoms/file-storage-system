@@ -11,6 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -58,5 +60,27 @@ func UploadFile() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusCreated, response.FileResponse{Status: http.StatusCreated, Message: "success", Data: map[string]interface{}{"data": result}})
+	}
+}
+
+func DownloadFile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		fileID := c.Param("fileID")
+		defer cancel()
+
+		var file model.File
+
+		objID, _ := primitive.ObjectIDFromHex(fileID)
+
+		err := filesCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&file)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
+		}
+
+		c.JSON(http.StatusCreated, response.FileResponse{Status: http.StatusCreated, Message: "success", Data: map[string]interface{}{"data": file}})
+
 	}
 }

@@ -24,5 +24,5 @@ func serveApp() {
 	routes.FileRoutes(publicRoutes)
 
 	router.Run(":8080")
-	fmt.Println("Server running on port 8000")
+	fmt.Println("Server running on port 8080")
 }
