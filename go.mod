@@ -1,6 +1,6 @@
 module file-storage-system
 
-go 1.22.4
+go 1.20
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
