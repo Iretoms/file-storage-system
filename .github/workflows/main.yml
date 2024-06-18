@@ -19,6 +19,12 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       -
+        name: Create .env file
+        run: |
+          echo: MONGODB_URI=${{ secrets.MONGODB_URI }} > .env
+          echo MONGODB_USERNAME=${{ secrets.MONGODB_USERNAME }} >> .env
+          echo MONGODB_PASSWORD=${{ secrets.MONGODB_PASSWORD }} >> .env
+      -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       -
