@@ -18,6 +18,6 @@ services:
     depends_on:
       - mongo
     environment:
-      MONGODB_URI: mongodb+srv://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@cluster0.xabiiit.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0@mongo:27017
+      MONGODB_URI: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@mongo:27017
     env_file:
       - .env

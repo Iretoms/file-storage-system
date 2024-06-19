@@ -1,7 +1,7 @@
 package response
 
 type FileResponse struct {
-	Status  int                    `json:"status"`
-	Message string                 `json:"message"`
-	Data    map[string]interface{} `json:"data"`
+	Status        int         `json:"status"`
+	Message       string      `json:"message"`
+	FileReference interface{} `json:"file_reference"`
 }

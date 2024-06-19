@@ -28,14 +28,14 @@ func UploadFile() gin.HandlerFunc {
 
 		formFile, header, err := c.Request.FormFile("file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: err.Error()})
 			return
 		}
 		defer formFile.Close()
 
 		content, err := io.ReadAll(formFile)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: err.Error()})
 			return
 		}
 
@@ -48,18 +48,18 @@ func UploadFile() gin.HandlerFunc {
 		file.ContentType = header.Header.Get("Content-Type")
 
 		if validationErr := validate.Struct(&file); validationErr != nil {
-			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": validationErr.Error()}})
+			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: validationErr.Error()})
 			return
 		}
 
 		result, err := filesCollection.InsertOne(ctx, file)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusCreated, response.FileResponse{Status: http.StatusCreated, Message: "success", Data: map[string]interface{}{"data": result}})
+		c.JSON(http.StatusCreated, response.FileResponse{Status: http.StatusCreated, Message: "success", FileReference: result.InsertedID})
 	}
 }
 
@@ -76,11 +76,13 @@ func DownloadFile() gin.HandlerFunc {
 		err := filesCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&file)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			c.JSON(http.StatusNotFound, response.FileResponse{Status: http.StatusNotFound, Message: err.Error()})
 			return
 		}
 
-		c.JSON(http.StatusCreated, response.FileResponse{Status: http.StatusCreated, Message: "success", Data: map[string]interface{}{"data": file}})
+		c.Header("Content-Disposition", "attachment; filename="+file.FileName)
+		c.Header("Content-Type", file.ContentType)
+		c.Data(http.StatusOK, file.ContentType, file.Content)
 
 	}
 }
