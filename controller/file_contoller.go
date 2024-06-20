@@ -28,14 +28,14 @@ func UploadFile() gin.HandlerFunc {
 
 		formFile, header, err := c.Request.FormFile("file")
 		if err != nil {
-			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: err.Error()})
+			handleError(c, http.StatusBadRequest, err)
 			return
 		}
 		defer formFile.Close()
 
 		content, err := io.ReadAll(formFile)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: err.Error()})
+			handleError(c, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -48,14 +48,14 @@ func UploadFile() gin.HandlerFunc {
 		file.ContentType = header.Header.Get("Content-Type")
 
 		if validationErr := validate.Struct(&file); validationErr != nil {
-			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: validationErr.Error()})
+			handleError(c, http.StatusBadRequest, err)
 			return
 		}
 
 		result, err := filesCollection.InsertOne(ctx, file)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.FileResponse{Status: http.StatusInternalServerError, Message: err.Error()})
+			handleError(c, http.StatusInternalServerError, err)
 			return
 		}
 
@@ -85,4 +85,8 @@ func DownloadFile() gin.HandlerFunc {
 		c.Data(http.StatusOK, file.ContentType, file.Content)
 
 	}
+}
+
+func handleError(c *gin.Context, status int, e error) {
+	c.JSON(status, response.FileResponse{Status: http.StatusBadRequest, Message: e.Error()})
 }

@@ -1,13 +1,12 @@
 module file-storage-system
 
-go 1.21
+go 1.20
 
-toolchain go1.22.4
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-playground/validator/v10 v10.22.0
-	github.com/joho/godotenv v1.5.1
+	github.com/go-playground/validator/v10 v10.22.0 
+	github.com/joho/godotenv v1.5.1 
 	go.mongodb.org/mongo-driver v1.15.1
 )
 
