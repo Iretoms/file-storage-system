@@ -52,6 +52,11 @@ func UploadFile() gin.HandlerFunc {
 			return
 		}
 
+		if file.Size > 16777216 {
+			c.JSON(http.StatusBadRequest, response.FileResponse{Status: http.StatusBadRequest, Message: "File too large, should be at most 16MB"})
+			return
+		}
+
 		result, err := filesCollection.InsertOne(ctx, file)
 
 		if err != nil {
@@ -76,7 +81,7 @@ func DownloadFile() gin.HandlerFunc {
 		err := filesCollection.FindOne(ctx, bson.M{"_id": objID}).Decode(&file)
 
 		if err != nil {
-			c.JSON(http.StatusNotFound, response.FileResponse{Status: http.StatusNotFound, Message: err.Error()})
+			handleError(c, http.StatusNotFound, err)
 			return
 		}
 

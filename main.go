@@ -1,14 +1,3 @@
-//   File Storage API:
-//    version: 1.0
-//    title: File Storage API
-//   Schemes: http, https
-//   Host: localhost:8080
-//   BasePath: /api/v1
-//      Consumes:
-//      - application/json
-//   Produces:
-//   - application/json
-//   swagger:meta
 package main
 
 import (
